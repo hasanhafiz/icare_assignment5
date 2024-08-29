@@ -1,0 +1,44 @@
+[
+    {
+        "user_id": "669857aa97cbb",
+        "name": "Hasan Hafiz",
+        "email": "hasanhafizsakil@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 1
+    },
+    {
+        "user_id": "66be4b42571cd",
+        "name": "Adury Afrose",
+        "email": "adury@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66be4fb505907",
+        "name": "Sumon Nasir",
+        "email": "nasir@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66be5056058b9",
+        "name": "Muhammad Faijullah",
+        "email": "faijullah@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66c0a6d492b2d",
+        "name": "Faisal",
+        "email": "faisal@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66c0a7d486152",
+        "name": "Hasan Samaun",
+        "email": "samaun@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    }
+]

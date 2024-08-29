@@ -1,0 +1,17 @@
+{
+    "name": "asus/assignment4",
+    "description": "Assignment 4 - Interactive cares",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Hasan Hafiz",
+            "email": "hasanhafizsakil@gmail.com"
+        }
+    ],
+    "require": {}
+}
