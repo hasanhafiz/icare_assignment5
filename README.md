@@ -30,7 +30,12 @@ There are two types of users: 'Admin' and 'Customer'.
 Make sure to keep both 'File' and 'Database' for storage options that can be changed in the configuration file.
 
 # Config File
-Config.php file is inside src/Config. Default storage option is 'file.'
+Config.php file is inside src/Config directory. Default storage option is 'file.'
 
 To work with File Storage, just change 'storage_type' to 'file'. 
 To work with Database Storage, just change 'storage_type' to 'database'
+
+# Creating Database
+A db.sql file exists inside database folder. Copy the sql file content and run it in  phpmyadmin client, it will create database with two tables 'users' and 'transactions'
+
+
