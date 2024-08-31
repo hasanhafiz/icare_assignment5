@@ -36,7 +36,7 @@ To work with File Storage, just change 'storage_type' to 'file'.
 To work with Database Storage, just change 'storage_type' to 'database'
 
 # Creating Database
-A db.sql file exists inside database folder. Copy the sql file content and run it in  phpmyadmin client, it will create database with two tables 'users' and 'transactions'
+A db.sql file exists inside database folder. Copy the sql file content and run it in  phpmyadmin client, it will create database with two tables 'users' and 'transactions'. It will also create 3 dummy users.
 
 # Default user list
 ```txt
