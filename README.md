@@ -1,5 +1,5 @@
 # **Project Name**
-Bangubank
+Bangubank (Assignment 05 )
 
 # **Project Description**
 
@@ -19,7 +19,7 @@ There are two types of users: 'Admin' and 'Customer'.
 - Transfer money to another customer's account by specifying their email address.
 - See the current balance of their account.
 
-**Note: **
+**Note:**
 - Use OOP concepts.
 - Use 'File' for storage.
 - You’ll need to use ‘Session’ for the Logged in users functionality.
@@ -29,5 +29,8 @@ There are two types of users: 'Admin' and 'Customer'.
 **Important**
 Make sure to keep both 'File' and 'Database' for storage options that can be changed in the configuration file.
 
-# icare_assignment5
-Assignment no 5 by Hasan Hafiz
+# Config File
+Config.php file is inside src/Config. Default storage option is 'file.'
+
+To work with File Storage, just change 'storage_type' to 'file'. 
+To work with Database Storage, just change 'storage_type' to 'database'
