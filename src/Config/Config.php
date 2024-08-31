@@ -26,4 +26,4 @@ class Config
     }
 }
 
-echo Config::get('storage_type');
+// echo Config::get('storage_type');
