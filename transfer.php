@@ -2,37 +2,37 @@
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\User;
-use App\Input;
-use App\Session;
-use App\Validate;
-use App\Transaction;
-use App\TransactionType;
+use App\Classes\User;
+use App\Classes\Input;
+use App\Config\Config;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Classes\Validate;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Storage\DatabaseStorage;
 
-// Utils::pretty_print($_SESSION, 'session');
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
 
+// load user object if exists
 if (Session::exists('user')) {
-  // load user
-  $user = new User;
+  $user = new User( $storage );
   $user_obj = $user->data();
-  $deposit = new Transaction;
-  
-  // Utils::pretty_print($user, 'User Class');
-  // Utils::pretty_print($user_obj, 'user');
+  $deposit = new Transaction( $storage );  
 }
 
+// validate & save data after form is submitted
 if (Input::exists()) {
   
   $validate = new Validate();
   $validate->check($_POST, ['amount', 'email']);
   
-  if ($validate->passed()) {
-    $transaction = new Transaction;
-    
-    $user = new User;
+  if ($validate->passed()) {       
+    $user = new User($storage);    
     $user_obj = $user->data();
     $loggedin_uid = $user_obj->user_id;
-    // $user->get(Session::get('user'));
     
     // first withdraw transfer amount from user account
     
@@ -40,7 +40,8 @@ if (Input::exists()) {
     $user->exists( Input::get('email') );
     $customer = $user->data();
         
-    $transaction->create([
+    $transaction = new Transaction( $storage );
+    $transaction->create( FileType::TRANSACTIONS, [
       'id' => uniqid(),
       'user_id' => $loggedin_uid,
       'customer_id' => $customer->user_id,
@@ -49,9 +50,8 @@ if (Input::exists()) {
       'transaction_type' => TransactionType::WITHDRAW
     ]);
     
-    // second, deposit to useremail address account
-
-    $transaction->create([
+    // second, deposit to useremail address account    
+    $transaction->create(FileType::TRANSACTIONS,[
       'id' => uniqid(),
       'user_id' => $customer->user_id,
       'customer_id' => $loggedin_uid,
@@ -59,14 +59,6 @@ if (Input::exists()) {
       'transaction_date' => date('d M Y, H:i:s A'), // 29 Sep 2023, 09:25 AM
       'transaction_type' => TransactionType::DEPOSIT
     ]);        
-    
-    // echo 'Error status : <br />';
-    // var_dump($transaction->error());
-    // Utils::pretty_print( $withdraw->error() , 'withdraw obj after insert data.' );    
-    // Utils::pretty_print( $withdraw );    
-    
-    // $user_data = $withdraw->get( Input::get('email') );
-    // var_dump( $withdraw );
     if ($transaction->error() === false) {
       Session::put('success', 'Transfer successfull!');
     }

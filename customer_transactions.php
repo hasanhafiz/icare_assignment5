@@ -1,14 +1,21 @@
 <?php
 
-use App\User;
+use App\Classes\User;
 // http://assignment4.test/customer_transactions.php?user_id=669857aa97cbb
 
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\Redirect;
-use App\Transaction;
-use App\TransactionType;
+use App\Config\Config;
+use App\Classes\FileType;
+use App\Helpers\Redirect;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Storage\DatabaseStorage;
+
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
 
 // If user_id not found in the url, then redirect to customers.php page
 if (! isset($_GET['user_id'])) {
@@ -16,16 +23,11 @@ if (! isset($_GET['user_id'])) {
 }
 
 // load all transaction by user_id
-$transaction = new Transaction;
+$transaction = new Transaction($storage);
 $all_transactions = $transaction->getTransactionsByUser($_GET['user_id']);
 
-$user = new User;
+$user = new User($storage);
 $user_obj = $user->getByID($_GET['user_id'])->data();
-
-// $users = $user->load();
-
-// Utils::pretty_print($user_obj, __FILE__);
-// Utils::pretty_print($all_transactions, __FILE__);
 
 ?>
 

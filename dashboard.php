@@ -1,27 +1,34 @@
 <?php
 session_start();
-use App\User;
-use App\Session;
-use App\Redirect;
-use App\Transaction;
-use App\TransactionType;
+use App\Classes\User;
+use App\Config\Config;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Helpers\Redirect;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Helpers\Utils;
+use App\Storage\DatabaseStorage;
 
 require_once 'vendor/autoload.php';
 
-if (Session::exists('user')) {
-    $user = new User();
-    $user_obj = $user->data(); // get user email
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
+
+// display transactions for specific user.
+// For admin, display all
+
+if (Session::exists('user')) {    
+    $user = new User($storage);
+    $user_obj = $user->data(); // get user email   
+    $transaction = new Transaction( $storage );
     
-    $transaction = new Transaction();
     if ($user->isAdmin()) {
         $transaction_data = $transaction->load();
     } else {
         $transaction_data = $transaction->getTransactionsByUser($user_obj->user_id);
     }
-    
-    // Utils::pretty_print($deposits_all);
-    // Utils::pretty_print($user, '=======user ');
-    // Utils::pretty_print($user_obj, '------ user obj');
 } else {
     Redirect::to('index.php');
 }
@@ -202,24 +209,25 @@ if (Session::exists('user')) {
                                                 <th scope="col" class="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"> Date </th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-gray-200 bg-white">
-                                            <?php foreach ($transaction_data as $data) {
-                                                                                                
-                                                $user_id = $data['user_id'];
-                                                if ( $data['user_id'] != $data['customer_id'] ) {
-                                                  $user_id = $data['customer_id'];
-                                                }
-                                                // $user_obj = $user->getByID($data['user_id'])->data();
-                                                $user_obj = $user->getByID( $user_id )->data();                                                                                                
-                                            ?>
-                                                <tr>
-                                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-800 sm:pl-0"> <?php echo $user_obj->name; ?> </td>
-                                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-0"> <?php echo $user_obj->email; ?> </td>
-                                                    <td class="whitespace-nowrap px-2 py-4 text-sm font-medium <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'text-emerald-600' : 'text-red-600' ; ?> "> $<?php echo $data['amount']; ?> </td>
-                                                    <td class="whitespace-nowrap px-2 py-4 text-sm font-medium <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'text-emerald-600' : 'text-red-600' ; ?>"> <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'Deposit' : 'Withdraw' ; ?> </td>
-                                                    <td class="whitespace-nowrap px-2 py-4 text-sm text-gray-500"> <?php echo $data['transaction_date']; ?> </td>
-                                                </tr>
-                                            <?php } ?>
+                                        <tbody class="divide-y divide-gray-200 bg-white">                                        
+                                        <?php 
+                                        $user = new User($storage);
+                                        foreach ($transaction_data as $data) {                                                                                            
+                                            $user_id = $data['user_id'];
+                                            if ( $data['user_id'] != $data['customer_id'] ) {
+                                                $user_id = $data['customer_id'];
+                                            }
+                               
+                                            $user_obj = $user->getByID( $user_id )->data();                                                                                                                                      
+                                        ?>
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-800 sm:pl-0"> <?php echo $user_obj->name; ?> </td>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-0"> <?php echo $user_obj->email; ?> </td>
+                                            <td class="whitespace-nowrap px-2 py-4 text-sm font-medium <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'text-emerald-600' : 'text-red-600' ; ?> "> $<?php echo $data['amount']; ?> </td>
+                                            <td class="whitespace-nowrap px-2 py-4 text-sm font-medium <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'text-emerald-600' : 'text-red-600' ; ?>"> <?php echo ($data['transaction_type'] == TransactionType::DEPOSIT) ? 'Deposit' : 'Withdraw' ; ?> </td>
+                                            <td class="whitespace-nowrap px-2 py-4 text-sm text-gray-500"> <?php echo $data['transaction_date']; ?> </td>
+                                        </tr>
+                                    <?php } ?>
                                             
                                             <?php if ( empty($transaction_data) ){ ?>
                                                 <tr>

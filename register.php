@@ -1,15 +1,22 @@
 <?php 
-use App\Hash;
-use App\User;
-use App\Input;
-use App\Session;
-use App\Redirect;
-use App\Validate;
+use App\Classes\User;
+use App\Helpers\Hash;
+use App\Classes\Input;
+use App\Config\Config;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Classes\Validate;
+use App\Helpers\Redirect;
+use App\Storage\FileStorage;
+use App\Storage\DatabaseStorage;
 
 session_start();
-
 require_once 'vendor/autoload.php';
 
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
+
+// validate & save user data
 if ( Input::exists() ) {
     $validate = new Validate();  
     $validate->check( $_POST, [
@@ -19,12 +26,8 @@ if ( Input::exists() ) {
         'confirm_password'
     ] );
     
-    // echo '<pre>';        
-    // var_dump( $validate );
-    // echo '</pre>';
-    
     if ( $validate->passed() ) {
-        $user = new User();             
+        $user = new User( $storage );             
         $user->create([
             'user_id' => uniqid(),
             'name' => Input::get( 'name' ),
@@ -33,11 +36,8 @@ if ( Input::exists() ) {
             'is_admin' => 0,                               
         ]);
                     
-        // $user_data = $user->get( Input::get('email') );
-        // var_dump( $user );
         Session::put('success', 'You registered successfully!');
         Session::delete('user');
-        // Session::put( Config::get('session/session_name'), $user->data()->email );
         Redirect::to( location: 'login.php');                                                                    
     }                                                      
 }

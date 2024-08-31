@@ -40,5 +40,26 @@
         "email": "samaun@gmail.com",
         "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
         "is_admin": 0
+    },
+    {
+        "user_id": "66d2b4630a2f6",
+        "name": "Ayesha Siddika",
+        "email": "ayesha@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66d2b486bd0f2",
+        "name": "Khadija Hasan",
+        "email": "khadija@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
+    },
+    {
+        "user_id": "66d2b93db87b0",
+        "name": "Maryam",
+        "email": "maryam@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "is_admin": 0
     }
 ]

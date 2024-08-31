@@ -2,6 +2,7 @@
 namespace App\Storage;
 
 use App\Config\Config;
+use App\Helpers\Utils;
 use App\Classes\TransactionType;
 use App\Storage\StorageInterface;
 
@@ -11,11 +12,15 @@ class FileStorage implements StorageInterface {
             $_error = false,
             $filename = 'users';
             
-    public function __construct( $filename ='users' )
+    public function __construct( $filename = 'users' )
     {
         $this->filename = $filename;
         $this->_filepath = Config::get('file_storage_path') . '/' . $this->filename . '.json'; 
     }
+    
+    public function setFilePath( $filename ) {
+        $this->_filepath = Config::get('file_storage_path') . '/' . $filename . '.json'; 
+    }      
     
     public function load()
     {
@@ -29,7 +34,13 @@ class FileStorage implements StorageInterface {
     public function insert( $table = '', $fields = [] )
     {
         $this->_error = false;
+        $this->filename = $table;
         $stored_data = $this->load();
+        
+        // Utils::pretty_print( $fields, 'fields**' );
+        // Utils::pretty_print( $stored_data, '** stored_data' );
+        // Utils::pretty_print( $this, '** this **' );
+        
         array_push( $stored_data, $fields );
         $write_into_file = file_put_contents( $this->_filepath, json_encode( $stored_data, JSON_PRETTY_PRINT ) );     
         if ( $write_into_file !== FALSE ) {
@@ -37,7 +48,7 @@ class FileStorage implements StorageInterface {
             return $this;
         } else {
             $this->_error = true;
-        }    
+        }
     }
     
     public function data() {
@@ -54,7 +65,7 @@ class FileStorage implements StorageInterface {
         }
         return false;
     }
-    
+        
     public function get( $table, $id ) {
         return $this->exists( $table , $id );
     }
@@ -78,6 +89,7 @@ class FileStorage implements StorageInterface {
         $deposited_amount = 0;
         $withdraw_amount = 0;
         $user_transactions = $this->getTransactionsByUser( $user_id );
+        
         foreach ($user_transactions as $transaction) {
             if ( $transaction['transaction_type'] == TransactionType::DEPOSIT ) {
                 $deposited_amount = $deposited_amount + $transaction['amount'];
@@ -87,5 +99,5 @@ class FileStorage implements StorageInterface {
             }            
         }
         return $deposited_amount - $withdraw_amount;
-    }    
+    }  
 }

@@ -24,8 +24,7 @@ class Session {
         if ( self::exists( $name ) ) {
             $session = self::get( $name );
             self::delete( $name );
-            return $session;
-            // do nothing
+            return $session;            
         } else {
             self::put( $name, $message );
         }

@@ -1,9 +1,10 @@
 <?php 
 namespace App\Classes;
 
-use App\Transaction;
 use App\Classes\User;
 use App\Config\Config;
+use App\Helpers\Utils;
+use App\Classes\Transaction;
 use App\Storage\FileStorage;
 use App\Classes\TransactionType;
 use App\Storage\DatabaseStorage;
@@ -11,10 +12,13 @@ use App\Storage\DatabaseStorage;
 class Validate {
     private $_passed = false;
     private $_erros = [];
+    private $storage;
     
     // initialize db
     public function __construct()
     {
+        $this->storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
+    
     }
     
     public function check( $source, $items = [] ) {      
@@ -45,13 +49,12 @@ class Validate {
         }
         
         // check if withdraw amount is less than deposited amount
-        if ( isset( $source['transaction_type'] ) && $source['transaction_type'] == TransactionType::WITHDRAW ) {
-            // $transaction = new Transaction();
-            // $user = new User;
-            // $user_obj = $user->data();
-            // $total_deposited_amount = $transaction->getCurrentBalance( $user_obj->user_id );     
+        if ( isset( $source['transaction_type'] ) && $source['transaction_type'] == TransactionType::WITHDRAW ) {                    
+            $user = new User ($this->storage);
+            $user_obj = $user->data();
             
-            $total_deposited_amount = 0 ;   
+            $transaction = new Transaction( $this->storage );
+            $total_deposited_amount = $transaction->getCurrentBalance( $user_obj->user_id );                             
             
             if ( $source['amount'] > $total_deposited_amount ) {
                 $this->addError( 'Withdraw amount must be less than Deposited amount' );                
@@ -60,19 +63,14 @@ class Validate {
         
         // Transfer form validation
         if ( isset( $source['transaction_type'] ) && $source['transaction_type'] == TransactionType::TRANSFER ) {                        
-            // $transaction = new Transaction();
-            // $user = new User;
-            // $user_obj = $user->data();
-            // $total_deposited_amount = $transaction->getCurrentBalance( $user_obj->user_id );
-            
-            $total_deposited_amount = 0 ;
-            // echo $total_deposited_amount;
-            // check user exists or not
-            
-            // $user = new User;
-            $user = $user->getByEmail( $source['email'] );
-            // var_dump( $user );            
-            if ( ! $user ) {
+            $user = new User($this->storage);
+            $user_obj = $user->data();
+            $user_mail = $user->getByEmail( $source['email'] );
+
+            $transaction = new Transaction($this->storage);                        
+            $total_deposited_amount = $transaction->getCurrentBalance( $user_obj->user_id );                    
+               
+            if ( ! $user_mail ) {
                 $this->addError( 'Email not exists!' );                
             }
             

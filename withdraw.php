@@ -2,38 +2,36 @@
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\User;
-use App\Input;
-use App\Session;
-use App\Validate;
-use App\Transaction;
-use App\TransactionType;
+use App\Classes\User;
+use App\Classes\Input;
+use App\Config\Config;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Classes\Validate;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Storage\DatabaseStorage;
 
-// Utils::pretty_print($_SESSION, 'session');
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
 
+// load user object if exists
 if (Session::exists('user')) {
-  // load user
-  $user = new User;
+  $user = new User($storage);
   $user_obj = $user->data();
-  $deposit = new Transaction;
-  
-  // Utils::pretty_print($user, 'User Class');
-  // Utils::pretty_print($user_obj, 'user');
+  $withdraw = new Transaction( $storage );
 }
 
+// validate & save data after form is submitted
 if (Input::exists()) {
   
   $validate = new Validate();
   $validate->check($_POST, ['amount']);
   
   if ( $validate->passed() ) {
-    $withdraw = new Transaction();
-    
-    $user = new User;
-    $user_obj = $user->data();
-    $user->get(Session::get('user'));
-    
-    $withdraw->create([
+    $withdraw = new Transaction( $storage );
+    $withdraw->create(FileType::TRANSACTIONS, [
       'id' => uniqid(),
       'user_id' => $user_obj->user_id,
       'customer_id' => $user_obj->user_id,
@@ -41,26 +39,12 @@ if (Input::exists()) {
       'transaction_date' => date('d M Y, H:i:s A'), // 29 Sep 2023, 09:25 AM
       'transaction_type' => TransactionType::WITHDRAW
     ]);
-    
-    // echo 'error<br />';
-    // var_dump( $withdraw->error() );
-    // Utils::pretty_print( $withdraw->error() , 'withdraw obj after insert data.' );    
-    // Utils::pretty_print( $withdraw );    
-    
-    // $user_data = $withdraw->get( Input::get('email') );
-    // var_dump( $withdraw );
+  
     if ( $withdraw->error() === false ) {
       Session::put('success', 'You successfully withdraw amount!');  
     }
-    
-    // Session::delete('withdraw');
-    // Session::put( Config::get('session/session_name'), $user->data()->email );
-    // Redirect::to(location: 'dashboard.php');
-  }
-  
+  }  
   $errors = $validate->errors();
-  // var_dump( $validate->errors() );
-  // Utils::pretty_print( $validate, 'validate.....' );
 }
 ?>
 <!DOCTYPE html>
@@ -217,7 +201,7 @@ if (Input::exists()) {
                 Current Balance
               </dt>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                $<?php echo $deposit->getCurrentBalance( $user_obj->user_id ); ?>
+                $<?php echo $withdraw->getCurrentBalance( $user_obj->user_id ); ?>
               </dd>
             </div>
           </dl>

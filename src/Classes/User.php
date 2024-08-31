@@ -21,40 +21,26 @@ class User {
      *
      */
     public function __construct( StorageInterface $storage )
-    {        
-        echo '<br/>get called class' . get_called_class();
+    {
         $this->storage = $storage;
-        // $this->storage->filename = 'transactions.json';
-        
-        Utils::pretty_print( $this->storage ); 
-                
-        // $this->_filepath = Config::get('file_storage_path') . "/{$this->_filename}.json";
-        // if ( Session::exists( $this->_session_name ) ) {            
-        //     $this->get( Session::get($this->_session_name) );
-        //     $this->_is_logged_in = true;  
-        //     if ( $this->data()->is_admin ) {
-        //         $this->_is_admin = true;
-        //          // echo 'User is admin';
-        //     }
-        // }
+        $this->storage->setFilePath( FileType::USERS );
+        if ( Session::exists( $this->_session_name ) ) {           
+            $this->get( Session::get($this->_session_name) );
+            $this->_is_logged_in = true;  
+            if ( $this->data()->is_admin ) {
+                $this->_is_admin = true;                
+            }
+        }
     }
     
     public function load()
     {
-        if ( file_exists( $this->_filepath ) ) {
-            return json_decode( file_get_contents( $this->_filepath ), true );
-        } else {
-            return [];
-        }
+        return $this->storage->load();
     }
         
     public function create($fields = []): void
     {
-        $stored_data = $this->load();
-        array_push( $stored_data, $fields );
-        file_put_contents( $this->_filepath, json_encode( $stored_data, JSON_PRETTY_PRINT ) );
-        
-        $this->_data = $this->get( $fields['email'] );
+        $this->storage->insert(FileType::USERS, $fields);
     }
     
     public function data() {
@@ -62,7 +48,7 @@ class User {
     }
     
     public function login(string $email = null, string $password = null)
-    {        
+    {
         if ( $this->exists( $email ) ) {
             if ( $this->data()->password == Hash::make( $password ) ) {
                 $this->_is_logged_in = true;
@@ -83,7 +69,7 @@ class User {
     }
     
     public function exists( $email ) {
-        $users = $this->load();
+        $users = $this->load();                
         foreach ($users as $user) {
             if ( $email == $user['email'] ) {
                 $this->_data = (object) $user;
@@ -98,9 +84,9 @@ class User {
     }
     
     public function getByID( $id ) {
-        $users = $this->load();
+        $users = $this->storage->load();        
         foreach ($users as $user) {
-            if ( $id == $user['user_id'] ) {
+            if ( $id == $user['user_id'] ) {                     
                 $this->_data = (object) $user;
                 return $this;
             }
@@ -109,13 +95,13 @@ class User {
     }   
     
     public function getByEmail( $email ) {
-        $users = $this->load();
+        $users = $this->storage->load();                
         foreach ($users as $user) {
             if ( $email == $user['email'] ) {
                 $this->_data = (object) $user;
                 return $this;
             }
-        }              
+        }       
         return false;
     }        
     

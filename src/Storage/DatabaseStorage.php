@@ -4,6 +4,7 @@ namespace App\Storage;
 use PDO;
 use PDOException;
 use App\Config\Config;
+use App\Helpers\Utils;
 use App\Classes\TransactionType;
 use App\Storage\StorageInterface;
 /** 
@@ -13,18 +14,20 @@ use App\Storage\StorageInterface;
  */
 
 class DatabaseStorage implements StorageInterface {
-    
+
     private static $_instance = null; 
         
     private $_pdo, 
             $_query, 
             $_error = false, 
             $_results, 
-            $_count = 0;
+            $_count = 0,
+            $filename = 'users';
     
     // constructor method to establish a connection
-    private function __construct( $filename = 'users' )
+    public function __construct( $filename = 'users' )
     {
+        $this->filename = $filename;
         try{
             $this->_pdo = new PDO( 'mysql:host=' . Config::get('db')['host'] . ';dbname=' . Config::get('db')['database'], Config::get('db')['username'] , Config::get('db')['password'] );
             $this->_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -34,6 +37,9 @@ class DatabaseStorage implements StorageInterface {
         }
     }
     
+    public function setFilePath( $filename ) {
+        $this->filename = $filename;
+    }      
     public static function getInstance() {
         if ( ! isset(self::$_instance) ) {
             return self::$_instance = new DatabaseStorage();
@@ -59,7 +65,7 @@ class DatabaseStorage implements StorageInterface {
             }
             
             if ( $this->_query->execute() ) {
-                $this->_results = $this->_query->fetchAll(PDO::FETCH_OBJ);
+                $this->_results = $this->_query->fetchAll(PDO::FETCH_ASSOC);
                 $this->_count = $this->_query->rowCount();
             } else {
                 $this->_error = true;
@@ -155,10 +161,13 @@ class DatabaseStorage implements StorageInterface {
             }            
         }
         return $deposited_amount - $withdraw_amount;
-    } 
+    }
     
     public function load() {
-        return [];
+        $results = $this->query("SELECT * FROM " . $this->filename );        
+        $results = $this->results();
+        // Utils::pretty_print( $this->filename );
+        return $results;
     }
         
 }

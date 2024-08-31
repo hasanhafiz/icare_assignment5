@@ -2,39 +2,37 @@
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\User;
-use App\Input;
-use App\Session;
-use App\Validate;
+use App\Classes\User;
+use App\Classes\Input;
+use App\Config\Config;
 use App\Helpers\Utils;
-use App\Transaction;
-use App\TransactionType;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Classes\Validate;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Storage\DatabaseStorage;
 
-// Utils::pretty_print($_SESSION, 'session');
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
 
+// load user object if exists
 if (Session::exists('user')) {
-  // load user
-  $user = new User;
-  // $user->get( Session::get( 'user' ) );
-  $user_obj = $user->data();
-  $deposit = new Transaction;
-  
-  // Utils::pretty_print($user, 'user');
-  // Utils::pretty_print($user_obj, 'user');
+  $user = new User($storage);
+  $user_obj = $user->data();  
+  $deposit = new Transaction( $storage );
 }
 
+// save data after deposite form is submitted
 if (Input::exists()) {
   
   $validate = new Validate();
   $validate->check($_POST, ['amount']);
 
-  if ($validate->passed()) {
-    $deposit = new Transaction();
-    
-    $user = new User;
-    $user->get(Session::get('user'));
-
-    $deposit->create([
+  if ($validate->passed()) {    
+    $deposit = new Transaction( $storage );            
+    $deposit->create(FileType::TRANSACTIONS, [
       'id' => uniqid(),
       'user_id' => $user_obj->user_id,
       'customer_id' => $user_obj->user_id,
@@ -43,20 +41,9 @@ if (Input::exists()) {
       'transaction_type' => TransactionType::DEPOSIT
     ]);
     
-    // echo 'error<br />';
-    // var_dump( $deposit->error() );
-    // Utils::pretty_print( $deposit->error() , 'deposit obj after insert data.' );    
-    // Utils::pretty_print( $deposit );    
-    
-    // $user_data = $deposit->get( Input::get('email') );
-    // var_dump( $deposit );
     if ( $deposit->error() === false ) {
       Session::put('success', 'Deposited successfully!');  
     }
-    
-    // Session::delete('deposit');
-    // Session::put( Config::get('session/session_name'), $user->data()->email );
-    // Redirect::to(location: 'dashboard.php');
   }
 }
 ?>

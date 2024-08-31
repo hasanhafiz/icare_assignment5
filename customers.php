@@ -2,14 +2,20 @@
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\User;
-use App\Session;
+use App\Classes\User;
+use App\Config\Config;
 use App\Helpers\Utils;
+use App\Classes\Session;
+use App\Classes\FileType;
+use App\Storage\FileStorage;
+use App\Storage\DatabaseStorage;
 
-$user = new User;
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
+
+// initialize user object 
+$user = new User($storage);
 $users = $user->load();
-
-// Utils::pretty_print( $users, __FILE__ );
 
 ?>
 <!DOCTYPE html>

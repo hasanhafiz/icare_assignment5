@@ -6,22 +6,23 @@
 session_start();
 require_once 'vendor/autoload.php';
 
-use App\User;
-use App\Transaction;
-use App\TransactionType;
+use App\Classes\User;
+use App\Config\Config;
+use App\Classes\FileType;
+use App\Classes\Transaction;
+use App\Storage\FileStorage;
+use App\Classes\TransactionType;
+use App\Storage\DatabaseStorage;
+
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
 
 // load all transaction for admin
-$transaction = new Transaction;
+$transaction = new Transaction($storage);
 $all_transactions = $transaction->load();
 
-$user = new User;
-// $user_obj = $user->getByID($_GET['user_id'])->data();
-
-// $users = $user->load();
-
-// Utils::pretty_print($user_obj, __FILE__);
-// Utils::pretty_print($all_transactions, __FILE__);
-
+// load user object
+$user = new User($storage);
 ?>
 <!DOCTYPE html>
 <html

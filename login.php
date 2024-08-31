@@ -14,25 +14,24 @@ use App\Storage\DatabaseStorage;
 
 require_once 'vendor/autoload.php';
 
-$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::TRANSACTIONS ) : new DatabaseStorage( FileType::TRANSACTIONS );
+// determine the storage type
+$storage = Config::get('storage_type') === 'file' ? new FileStorage( FileType::USERS ) : new DatabaseStorage( FileType::USERS );
+
+// Redirect user to dashboard 
 $user = new User($storage);
-
-// Utils::pretty_print($_SESSION, 'Session at landing: '. __FILE__ );
-
 if (Session::exists('user')) {
     Redirect::to('dashboard.php');
 }
 
+// validate & logged in if user exists and redirect to dashboard
 if (Input::exists()) {
-
+    
     $validate = new Validate();
     $validate->check($_POST, ['email', 'password']);
     if ($validate->passed()) {
         $user = new User($storage);
         $login = $user->login(Input::get('email'), Input::get('password'));
         if ($login) {
-            
-            
             Session::flash('success', 'You logged in successfully!');
             echo 'Success!';
             Redirect::to('dashboard.php');
